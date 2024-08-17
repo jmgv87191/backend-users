@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.springboot.backend.juan.users.users_backend.entities.User;
 import com.springboot.backend.juan.users.users_backend.services.UserService;
 
+import jakarta.validation.Valid;
+
 @CrossOrigin( originPatterns = "*" )
 @RestController
 @RequestMapping("/api/users")
@@ -51,21 +53,22 @@ public class UserController {
     }
     
     @PostMapping 
-    public ResponseEntity<?> create(@RequestBody User user, BindingResult result){
+    public ResponseEntity<?> create(@Valid  @RequestBody User user, BindingResult result){
 
         if (result.hasErrors()) {
-            Map<String, String> erros = new HashMap<String, String>();
-            result.getFieldErrors().forEach(error ->{
-                erros.put(error.getField(),"El campo "+ error.getField()+ error.getDefaultMessage() );
-            });
-            return ResponseEntity.badRequest().body(erros);
+            return validation(result);
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User>update( @RequestBody User user, BindingResult result ,@PathVariable Long id) {
+    public ResponseEntity<?>update(@Valid @RequestBody User user, BindingResult result ,@PathVariable Long id) {
+        
+        if (result.hasErrors()) {
+            return validation(result);
+        }
+        
         Optional<User> userOptional = service.findById(id);
 
         if (userOptional.isPresent()) {
@@ -92,5 +95,14 @@ public class UserController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> erros = new HashMap<>();
+        result.getFieldErrors().forEach(error ->{
+            erros.put(error.getField(),"El campo "+ error.getField()+ " "+ error.getDefaultMessage() );
+        });
+        return ResponseEntity.badRequest().body(erros);
+    }
+
 
 }
