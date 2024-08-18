@@ -3,6 +3,8 @@ package com.springboot.backend.juan.users.users_backend.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<User> findAll(Pageable pageable) {
+        return this.respository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
 
     public Optional<User> findById(Long id) {
 
@@ -45,5 +53,7 @@ public class UserServiceImpl implements UserService {
         this.respository.deleteById(id);
 
     }
+
+
 
 }
